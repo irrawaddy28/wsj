@@ -93,7 +93,7 @@ for f in $data/feats.scp; do
 done
 
 echo "# INFO"
-echo "$0 : Pre-training Deep Belief Network as a stack of RBMs"
+echo "$0 : Pre-training Deep Belief Network as a stack of RBMs, skip_cuda_check=$skip_cuda_check, use-gpu=$my_use_gpu"
 printf "\t dir       : $dir \n"
 printf "\t Train-set : $data \n"
 
@@ -188,7 +188,7 @@ else
   feature_transform_old=$feature_transform
   feature_transform=${feature_transform%.nnet}_cmvn-g.nnet
   echo "Renormalizing MLP input features into $feature_transform"
-  nnet-forward --use-gpu=yes \
+  nnet-forward --use-gpu=$my_use_gpu \
     $feature_transform_old "$(echo $feats | sed 's|train.scp|train.scp.10k|')" \
     ark:- 2>$dir/log/cmvn_glob_fwd.log |\
   compute-cmvn-stats ark:- - | cmvn-to-nnet - - |\
@@ -237,7 +237,7 @@ for depth in $(seq 1 $nn_depth); do
     #cmvn stats for init
     echo "Computing cmvn stats '$dir/$depth.cmvn' for RBM initialization"
     if [ ! -f $dir/$depth.cmvn ]; then 
-      nnet-forward --use-gpu=yes \
+      nnet-forward --use-gpu=$my_use_gpu \
        "nnet-concat $feature_transform $dir/$((depth-1)).dbn - |" \
         "$(echo $feats | sed 's|train.scp|train.scp.10k|')" \
         ark:- 2>$dir/log/cmvn_fwd.$depth.log | \

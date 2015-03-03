@@ -52,6 +52,16 @@ while(<STDIN>){
           die "Disk id $disk not found";
       }
       $filename = $2; # as a subdirectory of the distributed disk.
+      
+      # ad: This is a fix specific to MHJ's wsj1 CDs. All files inside 
+      # wsj1 CDs (i.e., 13_nn_nn/*, n = +ve integer) have been uppercased and 
+      # but the index files have file paths in lowercase. So we convert
+      # these file paths to upppercase.
+      #if ($disk =~  m/^13_\d+_\d+/) {		  
+		#  $filename =~ s:^/::; # Remove first slash, just in case it is present.
+		#  $filename = uc $filename;
+		#  #print "$disk: $filename \n";
+	  #}   
       if($disk eq "13_16_1" && `hostname` =~ m/fit.vutbr.cz/) {
           # The disk 13-16.1 has been uppercased for some reason, on the
           # BUT system.  This is a fix specifically for that case.
