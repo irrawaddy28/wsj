@@ -1,0 +1,76 @@
+; col 1: timit phones in Worldbet (Kaldi resolved)
+; col 2: corresponding turkish phones in Worldbet (Kaldi resolved). If exact match exists, write exact match. Otherwise, make an approximate match 
+; col 3: corresponding turkish phones in Worldbet (Kaldi resolved). If exact match exists, write exact match. Otherwise, set match to #0 (meaning no match). WARNING: This col has not been tested on Kaldi.
+; col 4: timit phones in Worldbet (HTK resolved)
+; col 5: corresponding turkish phones in Worldbet (HTK resolved). If exact match exists, write exact match. Otherwise, make an approximate match 
+; col 6: corresponding turkish phones in Worldbet (HTK resolved). If exact match exists, write exact match. Otherwise, set match to #0 (meaning no match). WARNING: This col has not been tested on HTK.
+;
+;
+; Example: 
+; "aI	a   #0"
+; This means the dipthong "aI" in timit has an approximate match with "A" in turkish if col 2 is used and no 
+; match in turkish if col 3 is used. Recall, the turkish language does not have any dipthongs. Col 3, being more restrictive, sets 
+; the match to #0. But col 2, being less restrictive, allows approximate match to "A". 
+;
+; Sanity checks: 
+; To know how many phones in the full Turkish set have been mapped from TIMIT, use:
+; > comm -12 <(cat metu2worldmap.txt|sed '/;/d' |awk '{print $2}'|sort -u) <(cat timit2turkishmap.txt|sed '/;/d'|awk '{print $2}'| sort -u)|wc -l
+;
+; To know how many phones in the full Turkish set have not been mapped from TIMIT, use:
+; > comm -23 <(cat metu2worldmap.txt|sed '/;/d'|awk '{print $2}'|sort -u) <(cat timit2turkishmap.txt|sed '/;/d'|awk '{print $2}'|sort -u)|wc -l
+;
+; The sum of both the above quantities should be equal to the number of phones present in the full Turkish set.
+;
+; To check for typos while entering the mapped phones, use:
+; > comm -13 <(cat metu2worldmap.txt|sed '/;/d' |awk '{print $2}'|sort -u) <(cat timit2turkishmap.txt|sed '/;/d'|awk '{print $2}'| sort -u)|wc -l
+;
+; The result of this must be 0. Otherwise, you entered wrong mapped phone(s).
+; ================== BEGIN MAP ==================
+sil	sil	sil	sil	sil	sil
+A	A	A	A	A	A
+@	a	#0	AE 	a	#0
+>	A	#0	AO 	A	#0
+&	eight	#0	AX 	uh8	#0
+D	d	#0	D 	d	#0
+E	E	E	E 	E	E
+l=	l	l	EL 	l	l
+n=	n	n	EN 	n	n
++	sil	sil	EPI 	sil	sil
+threer	eight	#0	ER 	uh8	#0	
+I	i	i	I 	i	i
+i:	i	#0	IY 	i	#0
+Ix	Ix	Ix	Ix 	Ix	Ix
+N	N	N	N 	N	N
+>i	eight	#0	OY 	uh8	#0
+nine	rop	#0	R9 	r1	#0
+S 	S	S	S 	S	S
+T	d	#0	T 	d	#0
+U	u	#0	U 	u	#0
+Λ	A	#0	Uh 	A	#0
+Z	zr	#0	Z 	zr	#0
+aI	a	#0	aI	a	#0
+aU	A	#0	aU	A	#0
+b	b	b	b	b	b
+bc	sil	#0	bc 	sil	#0
+d	d	d	d	d	d 
+dop	d	#0	d( 	d	#0
+dZ 	dZ	dZ	dZ 	dZ	dZ
+ei	E	#0	ei 	E	#0
+f 	f	f	f 	f	f
+g 	g	g	g 	g	g
+h 	h	h	h 	h	h
+j	j	j	j	j	j
+k	k	k 	k	k	k 
+l 	l	l	l 	l	l
+m 	m	m	m 	m	m
+n 	n	n	n 	n	n
+oU	o	#0	oU	o	#0
+p 	p	p	p 	p	p
+pc	sil	#0	pc	sil	#0
+s 	s	s	s 	s	s
+t	t	t	t	t	t
+tS	tS	tS	tS	tS	tS
+u 	u	u	u 	u	u
+v	v	v	v	v	v
+w	V[	#0	w 	V3	#0
+z 	z	z	z 	z	z

@@ -1,0 +1,131 @@
+; In this file, phonemes in METUbet are mapped to their corresponding representations in WORLDbet.
+; In addition, for each mapping, a brief description of the articulatory features is given.
+; This is to resolve any ambiguity in phoneme symbols by placing greater emphasis on the
+; knowledge of articulators rather than on symbols. Secondly, such articulatory
+; information can be used to construct left-right questions for decision tree clustering.
+; Lines starting with the semi-colon(;) are comments. These lines are not processed.
+; 
+; Some Definitions:
+; Approximant is produced by narrowing the vocal tract at the place of articulation, but not enough to produce a turbulent airstream like fricative. An approximant is a consonant and can be split into two types: central approximant (glide) and lateral approximant (liquid). An approximant is more popularly known as a semivowel although it is found in the IPA table of consonants!! A glide (y in yet, w in watch) is similar to a dipthong (vowels can be split into monopthongs and dipthongs. Dipthong e.g. the sound of ow in down, crown) due to its articulatory transition from source to a destination but it is not a vowel since it does not form the nucleus of a syllable like a dipthong. In a spectrogram, a dipthong will have distinct F2 and F3. A glide also has F2 and F3 but they approach each other with F2 rising and F3 falling forming an X-shaped pattern. Therefore, glides and dipthongs are similar in the acoustic sense (due to F2-F3) and differ in the psychological sense (due to syllable nucleus).
+; Trill is produced by directing air over the articulator so that it vibrates.
+; A lateral consonant (lateral approximant) is produced by directing the airstream over the sides of the tongue, rather than down the middle (e.g. l in land)
+; A retroflexed place of articulation occurs when the tip of the tongue curled up, but more generally, 
+; it means that it is palato-alveolar (which means the same thing as postalveolar) without being palatalized. 
+; Strident or Sibilant: A type of consonant produced by manner of articulation where it produced by an obstruction placed
+; in front of the turbulent air stream caused by frication. Hence, strident = frication + obstruction.
+; Obstruction typically means the tongue is curled lengthwise to direct the air over the edge of the teeth.
+; It is sometimes called as sibilant. Stridents typically occur in fricatives and affricates.
+; Examples: s (sat), sh (ship) are strident unv fricatives, z (zoo)/ zh (azure) are strident voiced fricatives,
+; ch (church) is strident unv affricate, dz (judge) is strident voiced affricate
+; f (fat)/ v (van) are non-strident voiced and unvoiced fricatives respectively.
+; 
+; Col 1: METUBET phone set
+; Col 2: WORLDBET phone set (Kaldi resolved)
+; Col 3: WORLDBET phone set (HTK resolved)
+;
+; Kaldi phones:
+; Kaldi phones are of the form <one or more non-numeric chars><optional: one or more numeric characters>
+; E.g. 3r, n3r are not acceptable but r3, nr3 are acceptable since digits can only trail.
+; To resolve Kaldi issues with some of the WORLDBET phones, the WORLDBET phones were further mapped to new
+; symbols. Therefore, the mapping looks like this: TIMIT -> WORLDBET -> Kaldi resolved WORLDBET.  
+; er  -> 3r	-> threer  (digits can only trail)
+; r  -> 9	-> nine	   (digits can only trail)	
+; dx -> d(	-> dop     (no open or closed parenthesis due to issues in scoring routines, e.g. tools/sctk/bin/csrfilt.sh/ validateOptDelTags() will return "error" if WORLDBET flapped symbols like b(, d(, g( etc. are used );
+; OE -> 8 -> eight
+;
+; HTK phones:
+; To resolve HTK issues with some of the WORLDBET phones, the WORLDBET phones were further mapped to a new
+; symbols. Those phones are:
+; METU -> WORLDBET -> HTK resolved WORLDBET
+; a) OE -> 8 -> uh8   (Using 8 resulted in errors using HLed. HLed does not accept numbers as phones)
+; b) RR -> r( -> r1   (Using r( resulted in errors using HParse as it does not accept r( in the input grammar file)
+; c) V ->  V[ -> V3   (Using V[ resulted in errors using HParse as it does not accept V[ in the input grammar file)
+; ================== BEGIN MAP ==================
+; A open, front, unrounded vowel ('m-A-n') 
+A	a	a
+; AA open, back, unrounded vowel ('AU-xiliary', 'h-O-t')
+AA	A	A
+; B voiced, bilabial stop ('B-a-t')
+B	b	b
+; C voiced palato-alveolar affricate ('J-udge')
+C	dZ	dZ
+; CH  unvoiced palato-alveolar affricate ('CH-ocolate')
+CH	tS	tS
+; D voiced alveolar stop  ('D-ad')
+D	d	d
+; E close-mid, front, unrounded vowel ('b-E-d')
+E	e	e
+; EE open-mid, front, unrounded vowel ('y-A-y', 'h-EA-d')
+EE	E	E
+; F unvoiced, labio-dental, fricative ('F-at')
+F	f	f
+; G voiced, palatal, stop  (http://en.wikipedia.org/wiki/Voiced_palatal_stop, or 'G-enC' in Turkish http://www.forvo.com/word/gen%C3%A7/)
+G	J	J
+; GG voiced, velar, stop ('G-o')
+GG	g	g
+; H unvoiced, glottal, fricative ('H-and')
+H	h	h
+; I  closed, central, unrounded vowel ('can-I-n' in Turkish http://www.forvo.com/search/canIn/ . sounds like can-uh-n)
+I	Ix	Ix
+; IY closed, front, unrounded short duration vowel (b-I-t but not b-EA-t)
+IY	i	i
+; J  voiced, palato-alveolar fricative ('a-Z-ure')
+J	Z	Z 
+; K unvoiced, palatal stop	(http://en.wikipedia.org/wiki/Voiceless_palatal_stop , sounds like KH-ya rather than k-a)
+K	c	c
+; KK  unvoiced, velar stop ('K-iss')
+KK	k	k
+; L alveolar, lateral approximant ('L-and')
+L	l	l
+; LL voiced velarized alvelolar, lateral approximant (sounds like A-LL-ah. http://en.wikipedia.org/wiki/Retroflex_lateral_approximant, or 'ku-l' in Turkish http://www.forvo.com/word/kul_hakk%C4%B1/)
+; It has a secondary articulation of velarization or pharyngealization, meaning that the back or root of the tongue approaches the soft palate (velum), or the back of the throat, respectively
+LL	lr	lr
+; M labial nasal ('M-ap')
+M	m	m
+; N velar nasal ('su-NG')
+N	N	N
+; NN alveolar nasal ('N-ap')
+NN	n	n
+; O closed-mid, back, rounded vowel (sounds like 'OH', http://www.forvo.com/word/o%C4%9Flak/#tr)
+O	o	o
+; OE open-mid, front, rounded vowel (sounds like 'UH' in English http://en.wikipedia.org/wiki/Open-mid_front_rounded_vowel, or 
+; like the 'o' in ortu in Turkish http://www.forvo.com/word/%C3%B6rt%C3%BC/#tr)
+; OE in METUbet is mapped to two distinct ohs - a) open-mid, front, rounded listed here b) mid, front, rounded vowel. 
+; We can select only one of these. We choose to drop b).  
+; The actual worldbet symbol is 8 but I used uh8 for ease of use in HTK.
+OE	eight	uh8
+; P unvoiced, bilabial stop ('P-at')
+P	p	p
+; There is some ambiguity about the mappings of the three r's below are. Need to check with a native Turkish speaker.
+; Does a trill or a uvular fricative really exist in Turkish words?
+; R alveolar trill (a.k.a ROLLING R. http://en.wikipedia.org/wiki/Alveolar_trill)
+R 	r	r
+; RH voiced uvular fricative (http://en.wikipedia.org/wiki/Voiced_uvular_fricative)
+RH   	K	K
+; RR is the postalveolar r flap - it is not retroflexed (http://en.wikipedia.org/wiki/Alveolar_flap). The actual worldbet symbol is r( but I used r1 for ease of use in HTK.
+RR	rop	r1 
+; S unvoiced alveolar fricative ('S-at')
+S	s	s
+; SH unvoiced palato-alveolar fricative ('SH-ip')
+SH	S	S
+; T unvoiced alveolar stop  ('T-ask')
+T	t	t 
+; U closed, back, rounded ('b-OO-t')
+U	u	u
+; UE closed, front, rounded (http://en.wikipedia.org/wiki/Close_front_rounded_vowel, 'd-U-gme' in Turkish http://www.forvo.com/search/dugme/)
+UE	y	y
+; V labiodental approximant ('ta-v-uk' in Turkish http://www.forvo.com/search/tavuk/ . Sounds like ta-WU-k)
+; The actual worldbet symbol is V[ but I used V3 for ease of use in HTK.
+V	V[	V3
+; VV voiced labio-dental fricative ('V-an')
+VV	v	v
+; Y voiced palatal central approximant since middle of tongue is raised at the palate but not raised enough to create turbulence
+; ('Y-ou', 'Y-ellow')
+Y	j	j
+; Z voiced alveolar fricative ('Z-oo')
+Z	z	z
+; ZH voiced retroflex (palato-alveolar) fricative (http://en.wikipedia.org/wiki/Voiced_retroflex_fricative)
+ZH	zr	zr
+; Silence appearing in Turkish corpus
+SIL 	sil	sil	
+; ================== END MAP ==================

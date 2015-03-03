@@ -1,0 +1,128 @@
+; In this file, the set of phonemes (the 48-phoneme set) in TIMIT are mapped to their corresponding representations in WORLDbet.
+; In addition, for each mapping, a brief description of the articulatory features is given.
+; This is to resolve any ambiguity in phoneme symbols by placing greater emphasis on the
+; knowledge of articulators rather than on symbols. Secondly, such articulatory
+; information can be used to construct left-right questions for decision tree clustering.
+; Lines starting with the semi-colon(;) are comments. These lines are not processed.
+; A 1-1 mapping file to convert TIMIT phonemes to their corresponding Worldbet phonemes
+; TIMIT phonemes are in col 1, Worldbet phonemes are in col 2
+;
+;
+; To resolve HTK issues with some of the WORLDBET phones, the WORLDBET phones were further mapped to new
+; symbols. Therefore, the mapping looks like this: TIMIT -> WORLDBET -> HTK resolved WORLDBET.  
+; ae -> @ 			-> AE    
+; ah -> inverted V 		-> Uh
+; ao -> > 			-> AO
+; ax -> &			-> AX
+; axr -> &r			-> AXR
+; er -> 3r			-> ER
+; iy -> i:			-> IY
+; oy -> >i			-> OY
+; el -> l=			-> EL
+; em -> m=			-> EM
+; en -> n=			-> EN
+; r  -> 9			-> R9
+; epi -> +			-> EPI
+; ================== BEGIN MAP ==================
+; AA open, back, unrounded vowel ('AU-xiliary', 'h-O-t')
+aa		A
+; near-open, front, unrounded vowel ('A-sh')
+ae		AE
+; open-mid, back, unrounded vowel ('b-U-t')
+ah 		Uh
+; open-mid, back, rounded vowel ('c-AU-ght')
+ao		AO
+; dipthong ('d-OW-n', 'h-OW')
+aw		aU
+; mid, central, vowel a.k.a schwa vowel ('sof-A')
+ax		AX
+; mid, central, vowel followed by retroflexed 'r' (not a typical vowel)
+; axr		AXR  # commented because axr is part of TIMIT's 60 phoneme set
+; dipthong ('h-I-de')
+ay 		aI
+; voiced, bilabial stop ('B-a-t')
+b		b
+; unvoiced palato-alveolar affricate ('CH-ocolate')
+ch		tS
+; all unvoiced closures pcl,tcl,kcl (60 phn set) :: cl (48 phn set)
+cl		pc
+; voiced alveolar stop  ('D-ad')
+d		d
+; voiced dental non-strident fricative ('TH-at')
+dh		D
+; flap or tap d  ('bu-TT-er')
+dx		d(
+; open-mid, front, unrounded vowel ('y-A-y', 'h-EA-d')
+eh		E
+; syllabic l ('batt-LE')
+el		EL 
+; syllabic m ('bott-OM')
+; em		EM  # commented because dm is part of TIMIT's 60 phoneme set
+; syllabic n ('butt-ON')
+en		EN
+; epenthetic silece
+epi		EPI
+; open-mid, central, unrounded vowel followed by retroflexed 'r' (not a typical vowel)
+er 		ER
+; dipthong ('tod-AY')
+ey		ei 
+; unvoiced, labio-dental, fricative ('F-at')
+f		f
+; voiced, velar, stop ('G-o')
+g		g
+; unvoiced, glottal, fricative ('H-and')
+hh		h
+; closed-mid, mid-front, unrounded, short duration vowel ('h-I-d')
+ih		I
+; closed, central, unrounded vowel ('ros-E-s')
+ix		Ix
+; closed, front, unrounded, long duration vowel (b-EA-t but not b-I-t)
+iy		IY
+; voiced palato-alveolar affricate ('J-udge')
+jh		dZ
+; unvoiced, velar stop ('K-iss')
+k		k
+; alveolar, lateral approximant ('L-and')
+l		l
+; labial nasal ('M-ap')
+m		m
+; alveolar nasal ('N-ap')
+n		n
+; velar nasal ('su-NG')
+ng		N
+; dipthong ('sh-OW')
+ow		oU
+;  dipthong ('b-OY', 'j-OY')
+oy		OY
+; unvoiced, bilabial stop ('P-at')
+p		p
+; voiced, alveolar, central approximant (glide)
+r		R9
+; unvoiced alveolar fricative ('S-at')
+s		s
+; unvoiced palato-alveolar fricative ('SH-ip')
+sh		S
+; unvoiced alveolar stop  ('T-ask')
+t		t
+; unvoiced dental non-strident fricative ('TH-at')
+th		T
+; closed-mid, back, rounded, short vowel ('b-OO-k')
+uh		U
+; closed, back, rounded, long vowel ('b-OO-t')
+uw		u
+; voiced labio-dental fricative ('V-an')
+v		v
+; all voiced closures bcl,dcl,gcl (60 phn set) :: vcl (48 phn set)
+vcl		bc
+; voiced bilabial velar central approximant (glide)
+w		w
+; voiced palatal central approximant (glide) since middle of tongue is raised at the palate but not raised enough to create turbulence
+; ('Y-ou', 'Y-ellow')
+y		j
+; voiced alveolar fricative ('Z-oo')	
+z		z
+; voiced, palato-alveolar fricative ('a-Z-ure')
+zh		Z
+; Silence appearing in TIMIT corpus
+sil		sil
+; ================== END MAP ==================

@@ -1,0 +1,120 @@
+; In this file, phonemes in METUbet are mapped to their corresponding representations in WORLDbet.
+; In addition, for each mapping, a brief description of the articulatory features is given.
+; This is to resolve any ambiguity in phoneme symbols by placing greater emphasis on the
+; knowledge of articulators rather than on symbols. Secondly, such articulatory
+; information can be used to construct left-right questions for decision tree clustering.
+; Lines starting with the semi-colon(;) are comments. These lines are not processed.
+; A 1-1 mapping file to convert METUbet phonemes to their corresponding Worldbet phonemes
+; METUbet phonemes are in col 1, Worldbet phonemes are in col 2
+; Definitions:
+; Approximant is produced by narrowing the vocal tract at the place of articulation, but not enough to produce a turbulent airstream like fricative. An approximant is a consonant and can be split into two types: central approximant (glide) and lateral approximant (liquid). An approximant is more popularly known as a semivowel although it is found in the IPA table of consonants!! A glide (y in yet, w in watch) is similar to a dipthong (vowels can be split into monopthongs and dipthongs. Dipthong e.g. the sound of ow in down, crown) due to its articulatory transition from source to a destination but it is not a vowel since it does not form the nucleus of a syllable like a dipthong. In a spectrogram, a dipthong will have distinct F2 and F3. A glide also has F2 and F3 but they approach each other with F2 rising and F3 falling forming an X-shaped pattern. Therefore, glides and dipthongs are similar in the acoustic sense (due to F2-F3) and differ in the psychological sense (due to syllable nucleus).
+; Trill is produced by directing air over the articulator so that it vibrates.
+; A lateral consonant (lateral approximant) is produced by directing the airstream over the sides of the tongue, rather than down the middle (e.g. l in land)
+; A retroflexed place of articulation occurs when the tip of the tongue curled up, but more generally, 
+; it means that it is palato-alveolar (which means the same thing as postalveolar) without being palatalized. 
+; Strident or Sibilant: A type of consonant produced by manner of articulation where it produced by an obstruction placed
+; in front of the turbulent air stream caused by frication. Hence, strident = frication + obstruction.
+; Obstruction typically means the tongue is curled lengthwise to direct the air over the edge of the teeth.
+; It is sometimes called as sibilant. Stridents typically occur in fricatives and affricates.
+; Examples: s (sat), sh (ship) are strident unv fricatives, z (zoo)/ zh (azure) are strident voiced fricatives,
+; ch (church) is strident unv affricate, dz (judge) is strident voiced affricate
+; f (fat)/ v (van) are non-strident voiced and unvoiced fricatives respectively.
+; Notes:
+; To resolve HTK issues with some of the WORLDBET phones, the WORLDBET phones were further mapped to a new
+; symbols. Those phones are:
+; METU -> WORLDBET -> HTK resolved WORLDBET
+; a) OE -> 8 -> uh8   (Using 8 resulted in errors using HLed. HLed does not accept numbers as phones)
+; b) RH -> r( -> r1   (Using r( resulted in errors using HParse as it does not accept r( in the input grammar file)
+; c) V ->  V[ -> V3   (Using V[ resulted in errors using HParse as it does not accept V[ in the input grammar file)
+;
+; To Do: Resolve ambiguity about the three r's in Turkish by checking with a native Turkish speaker
+;
+;
+;
+; ================== BEGIN MAP ==================
+; A open, front, unrounded vowel ('m-A-n') 
+A	a
+; AA open, back, unrounded vowel ('AU-xiliary', 'h-O-t')
+AA	A
+; B voiced, bilabial stop ('B-a-t')
+B	b
+; C voiced palato-alveolar affricate ('J-udge')
+C	dZ
+; CH  unvoiced palato-alveolar affricate ('CH-ocolate')
+CH	tS
+; D voiced alveolar stop  ('D-ad')
+D	d
+; E close-mid, front, unrounded vowel ('b-E-d')
+E	e
+; EE open-mid, front, unrounded vowel ('y-A-y', 'h-EA-d')
+EE	E
+; F unvoiced, labio-dental, fricative ('F-at')
+F	f
+; G voiced, palatal, stop  (http://en.wikipedia.org/wiki/Voiced_palatal_stop, or 'G-enC' in Turkish http://www.forvo.com/word/gen%C3%A7/)
+G	J
+; GG voiced, velar, stop ('G-o')
+GG	g
+; H unvoiced, glottal, fricative ('H-and')
+H	h
+; I  closed, central, unrounded vowel ('can-I-n' in Turkish http://www.forvo.com/search/canIn/ . sounds like can-uh-n)
+I	Ix
+; IY closed, front, unrounded short duration vowel (b-I-t but not b-EA-t)
+IY	i
+; J  voiced, palato-alveolar fricative ('a-Z-ure')
+J	Z 
+; K unvoiced, palatal stop	(http://en.wikipedia.org/wiki/Voiceless_palatal_stop , sounds like KH-ya rather than k-a)
+K	c
+; KK  unvoiced, velar stop ('K-iss')
+KK	k
+; L alveolar, lateral approximant ('L-and')
+L	l
+; LL voiced velarized alvelolar, lateral approximant (sounds like A-LL-ah. http://en.wikipedia.org/wiki/Retroflex_lateral_approximant, or 'ku-l' in Turkish http://www.forvo.com/word/kul_hakk%C4%B1/)
+; It has a secondary articulation of velarization or pharyngealization, meaning that the back or root of the tongue approaches the soft palate (velum), or the back of the throat, respectively
+LL	lr
+; M labial nasal ('M-ap')
+M	m
+; N velar nasal ('su-NG')
+N	N
+; NN alveolar nasal ('N-ap')
+NN	n
+; O closed-mid, back, rounded vowel (sounds like 'OH', http://www.forvo.com/word/o%C4%9Flak/#tr)
+O	o
+; OE open-mid, front, rounded vowel (sounds like 'UH' in English http://en.wikipedia.org/wiki/Open-mid_front_rounded_vowel, or 
+; like the 'o' in ortu in Turkish http://www.forvo.com/word/%C3%B6rt%C3%BC/#tr)
+; OE in METUbet is mapped to two distinct ohs - a) open-mid, front, rounded listed here b) mid, front, rounded vowel. 
+; We can select only one of these. We choose to drop b).  
+; The actual worldbet symbol is 8 but I used uh8 for ease of use in HTK.
+OE	uh8
+; P unvoiced, bilabial stop ('P-at')
+P	p
+; There is some ambiguity about the mappings of the three r's below are. Need to check with a native Turkish speaker.
+; Does a trill or a uvular fricative really exist in Turkish words?
+; R alveolar trill (a.k.a ROLLING R. http://en.wikipedia.org/wiki/Alveolar_trill)
+R 	r
+; RH voiced uvular fricative (http://en.wikipedia.org/wiki/Voiced_uvular_fricative)
+RH   K
+; RR r flap - not retroflexed (http://en.wikipedia.org/wiki/Alveolar_flap). The actual worldbet symbol is r( but I used r1 for ease of use in HTK.
+RR	r1 
+; S unvoiced alveolar fricative ('S-at')
+S	s
+; SH unvoiced palato-alveolar fricative ('SH-ip')
+SH	S
+; T unvoiced alveolar stop  ('T-ask')
+T	t 
+; U closed, back, rounded ('b-OO-t')
+U	u
+; UE closed, front, rounded (http://en.wikipedia.org/wiki/Close_front_rounded_vowel, 'd-U-gme' in Turkish http://www.forvo.com/search/dugme/)
+UE	y
+; V labiodental approximant ('ta-v-uk' in Turkish http://www.forvo.com/search/tavuk/ . Sounds like ta-WU-k)
+; The actual worldbet symbol is V[ but I used V3 for ease of use in HTK.
+V	V3
+; VV voiced labio-dental fricative ('V-an')
+VV	v
+; Y voiced palatal central approximant since middle of tongue is raised at the palate but not raised enough to create turbulence
+; ('Y-ou', 'Y-ellow')
+Y	j
+; Z voiced alveolar fricative ('Z-oo')
+Z	z
+; ZH voiced retroflex (palato-alveolar) fricative (http://en.wikipedia.org/wiki/Voiced_retroflex_fricative)
+ZH	zr
+; ================== END MAP ==================
