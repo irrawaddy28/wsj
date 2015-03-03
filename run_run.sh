@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# bash run.sh 1
-# bash run.sh 2
+bash run.sh 1
+bash run.sh 2
 bash run.sh 3
 bash run.sh 4
 bash run.sh 5
