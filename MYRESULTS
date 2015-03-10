@@ -1,0 +1,75 @@
+exp/mono0a: monophone
+exp/tri1: triphone, delta
+exp/tri2a: triphone,  delta + delta-delta
+exp/tri2b: triphone, LDA + MLLT
+exp/tri3b: triphone, LDA + MLLT + SAT
+exp/tri4b: This step is just to demonstrate the train_quick.sh script, in which we initialize the GMMs from the old system's GMMs.
+exp/dnn5b_pretrain-dbn_dnn: DBN-DNN
+
+%WER 34.59 [ 2848 / 8234, 290 ins, 449 del, 2109 sub ] exp/mono0a/decode_tgpr_dev93/wer_10
+%WER 25.55 [ 1442 / 5643, 141 ins, 201 del, 1100 sub ] exp/mono0a/decode_tgpr_eval92/wer_10
+%WER 19.81 [ 1631 / 8234, 284 ins, 181 del, 1166 sub ] exp/tri1/decode_tgpr_dev93/wer_15
+%WER 19.01 [ 1565 / 8234, 258 ins, 171 del, 1136 sub ] exp/tri1/decode_tgpr_dev93_tg1/wer_17
+%WER 19.01 [ 1565 / 8234, 258 ins, 171 del, 1136 sub ] exp/tri1/decode_tgpr_dev93_tg2/wer_17
+%WER 18.74 [ 1543 / 8234, 263 ins, 158 del, 1122 sub ] exp/tri1/decode_tgpr_dev93_tg3/wer_15
+%WER 18.67 [ 1537 / 8234, 264 ins, 158 del, 1115 sub ] exp/tri1/decode_tgpr_dev93_tg4/wer_15
+%WER 13.43 [ 758 / 5643, 154 ins, 62 del, 542 sub ] exp/tri1/decode_tgpr_eval92/wer_14
+%WER 25.64 [ 1447 / 5643, 365 ins, 88 del, 994 sub ] exp/tri2a/decode_eval92_bg5k/wer_19
+%WER 17.89 [ 1473 / 8234, 282 ins, 132 del, 1059 sub ] exp/tri2a/decode_tgpr_dev93/wer_13
+%WER 17.12 [ 1410 / 8234, 255 ins, 159 del, 996 sub ] exp/tri2a/decode_tgpr_dev93_fromlats/wer_18
+%WER 11.98 [ 676 / 5643, 131 ins, 61 del, 484 sub ] exp/tri2a/decode_tgpr_eval92/wer_14
+%WER 17.04 [ 1403 / 8234, 244 ins, 172 del, 987 sub ] exp/tri2b/decode_tgpr_dev93/wer_17
+%WER 15.67 [ 1286 / 8209, 231 ins, 151 del, 904 sub ] [PARTIAL] exp/tri2b/decode_tgpr_dev93_tg/wer_20
+%WER 15.92 [ 1311 / 8234, 235 ins, 151 del, 925 sub ] exp/tri2b/decode_tgpr_dev93_tg_biglm/wer_20
+%WER 15.56 [ 1277 / 8209, 226 ins, 156 del, 895 sub ] [PARTIAL] exp/tri2b/decode_tgpr_dev93_tg_mbr/wer_20
+%WER 11.16 [ 630 / 5643, 117 ins, 57 del, 456 sub ] exp/tri2b/decode_tgpr_eval92/wer_18
+%WER 14.14 [ 1164 / 8234, 224 ins, 117 del, 823 sub ] exp/tri3b_20k/decode_tgpr_dev93/wer_16
+%WER 18.84 [ 1551 / 8234, 299 ins, 165 del, 1087 sub ] exp/tri3b_20k/decode_tgpr_dev93.si/wer_16
+%WER 11.56 [ 952 / 8234, 111 ins, 138 del, 703 sub ] exp/tri3b/decode_bd_tgpr_dev93/wer_16
+%WER 15.99 [ 1317 / 8234, 168 ins, 188 del, 961 sub ] exp/tri3b/decode_bd_tgpr_dev93.si/wer_16
+%WER 7.07 [ 399 / 5643, 54 ins, 45 del, 300 sub ] exp/tri3b/decode_bd_tgpr_eval92/wer_16
+%WER 10.81 [ 610 / 5643, 88 ins, 75 del, 447 sub ] exp/tri3b/decode_bd_tgpr_eval92.si/wer_15
+%WER 14.12 [ 1163 / 8234, 214 ins, 126 del, 823 sub ] exp/tri3b/decode_tgpr_dev93/wer_19
+%WER 14.27 [ 1175 / 8234, 209 ins, 128 del, 838 sub ] exp/tri3b/decode_tgpr_dev93_basis/wer_20
+%WER 18.81 [ 1549 / 8234, 259 ins, 177 del, 1113 sub ] exp/tri3b/decode_tgpr_dev93_basis.si/wer_20
+%WER 14.29 [ 1177 / 8234, 209 ins, 129 del, 839 sub ] exp/tri3b/decode_tgpr_dev93_basis_utt/wer_20
+%WER 18.81 [ 1549 / 8234, 259 ins, 177 del, 1113 sub ] exp/tri3b/decode_tgpr_dev93_basis_utt.si/wer_20
+%WER 18.81 [ 1549 / 8234, 259 ins, 177 del, 1113 sub ] exp/tri3b/decode_tgpr_dev93.si/wer_20
+%WER 13.08 [ 1077 / 8234, 220 ins, 103 del, 754 sub ] exp/tri3b/decode_tgpr_dev93_tg/wer_15
+%WER 14.12 [ 1163 / 8234, 214 ins, 126 del, 823 sub ] exp/tri3b/decode_tgpr_dev93_utt/wer_19
+%WER 18.81 [ 1549 / 8234, 259 ins, 177 del, 1113 sub ] exp/tri3b/decode_tgpr_dev93_utt.si/wer_20
+%WER 8.88 [ 501 / 5643, 124 ins, 29 del, 348 sub ] exp/tri3b/decode_tgpr_eval92/wer_14            (This is the one we need for HMM based system)
+%WER 8.91 [ 503 / 5643, 123 ins, 29 del, 351 sub ] exp/tri3b/decode_tgpr_eval92_basis/wer_14
+%WER 13.22 [ 746 / 5643, 167 ins, 52 del, 527 sub ] exp/tri3b/decode_tgpr_eval92_basis.si/wer_13
+%WER 8.91 [ 503 / 5643, 123 ins, 29 del, 351 sub ] exp/tri3b/decode_tgpr_eval92_basis_utt/wer_14
+%WER 13.22 [ 746 / 5643, 167 ins, 52 del, 527 sub ] exp/tri3b/decode_tgpr_eval92_basis_utt.si/wer_13
+%WER 13.22 [ 746 / 5643, 167 ins, 52 del, 527 sub ] exp/tri3b/decode_tgpr_eval92.si/wer_13
+%WER 8.61 [ 486 / 5643, 116 ins, 25 del, 345 sub ] exp/tri3b/decode_tgpr_eval92_tg/wer_17
+%WER 8.88 [ 501 / 5643, 124 ins, 29 del, 348 sub ] exp/tri3b/decode_tgpr_eval92_utt/wer_14
+%WER 13.22 [ 746 / 5643, 167 ins, 52 del, 527 sub ] exp/tri3b/decode_tgpr_eval92_utt.si/wer_13
+%WER 9.40 [ 774 / 8234, 87 ins, 116 del, 571 sub ] exp/tri4b/decode_bd_tgpr_dev93/wer_18
+%WER 12.90 [ 1062 / 8234, 154 ins, 145 del, 763 sub ] exp/tri4b/decode_bd_tgpr_dev93.si/wer_15
+%WER 5.90 [ 333 / 5643, 51 ins, 35 del, 247 sub ] exp/tri4b/decode_bd_tgpr_eval92/wer_16
+%WER 8.59 [ 485 / 5643, 84 ins, 48 del, 353 sub ] exp/tri4b/decode_bd_tgpr_eval92.si/wer_14
+%WER 12.12 [ 998 / 8234, 208 ins, 92 del, 698 sub ] exp/tri4b/decode_tgpr_dev93/wer_15
+%WER 15.82 [ 1303 / 8234, 251 ins, 127 del, 925 sub ] exp/tri4b/decode_tgpr_dev93.si/wer_17
+%WER 8.03 [ 453 / 5643, 121 ins, 23 del, 309 sub ] exp/tri4b/decode_tgpr_eval92/wer_14
+%WER 11.16 [ 630 / 5643, 133 ins, 42 del, 455 sub ] exp/tri4b/decode_tgpr_eval92.si/wer_17
+%WER 6.70 [ 552 / 8234, 65 ins, 78 del, 409 sub ] exp/dnn5b_pretrain-dbn_dnn/decode_bd_tgpr_dev93/wer_10
+%WER 3.60 [ 203 / 5643, 20 ins, 13 del, 170 sub ] exp/dnn5b_pretrain-dbn_dnn/decode_bd_tgpr_eval92/wer_12 (This is the one we need for DBN-DNN based system)
+
+
+Stats:
+======
+		trn (si284)		test(eval 92)
+		==========		=============
+#utts		37416			333
+#durn(approx)	81.49 hrs		42.3 min 
+#avg durn	7.84 s			7.6 s 
+#min durn	0.91 s			3.20 s
+#max durn	24.36 s			14.49 s
+#total words	645877			5643
+#unique words	14525			1868
+#accuracy(100-wer) -			91.12 (MFCC+LDA+MLLT+SAT+GMM-HMM), 96.4 (+DNN)
+
+

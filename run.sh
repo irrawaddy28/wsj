@@ -2,7 +2,7 @@
 
 . ./cmd.sh ## You'll want to change cmd.sh to something that will work on your system.
            ## This relates to the queue.
-
+set -e # exit on error
 # This is a shell script, but it's recommended that you run the commands one by
 # one by copying and pasting into the shell.
 
@@ -15,9 +15,16 @@
 #wsj0=/data/corpora0/LDC93S6B
 #wsj1=/data/corpora0/LDC94S13B
 
-wsj0=/export/corpora5/LDC/LDC93S6B
-wsj1=/export/corpora5/LDC/LDC94S13B
+#wsj0=/export/corpora5/LDC/LDC93S6B
+#wsj1=/export/corpora5/LDC/LDC94S13B
 
+wsj0=${corpus_dir}/wsj/wsj0
+wsj1=${corpus_dir}/wsj/wsj1
+
+
+stage=$1;
+
+if [ $stage -eq 1 ]; then
 local/wsj_data_prep.sh $wsj0/??-{?,??}.? $wsj1/??-{?,??}.?  || exit 1;
 
 # Sometimes, we have seen WSJ distributions that do not have subdirectories 
@@ -78,7 +85,9 @@ local/wsj_format_data.sh || exit 1;
 	   --cmd "$decode_cmd -l mem_free=1G" --bptt 4 --bptt-block 10 --hidden 400 --nwords 40000 --direct 2000 data/local/rnnlm-hs.h400.voc40k 
    )
   ) &
+fi
 
+if [ $stage -eq 2 ]; then
 # Now make MFCC features.
 # mfccdir should be some place with a largish disk where you
 # want to store MFCC features.
@@ -88,8 +97,9 @@ for x in test_eval92 test_eval93 test_dev93 train_si284; do
    data/$x exp/make_mfcc/$x $mfccdir || exit 1;
  steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir || exit 1;
 done
+fi
 
-
+if [ $stage -eq 3 ]; then
 utils/subset_data_dir.sh --first data/train_si284 7138 data/train_si84 || exit 1
 
 # Now make subset with the shortest 2k utterances from si-84.
@@ -97,8 +107,9 @@ utils/subset_data_dir.sh --shortest data/train_si84 2000 data/train_si84_2kshort
 
 # Now make subset with half of the data from si-84.
 utils/subset_data_dir.sh data/train_si84 3500 data/train_si84_half || exit 1;
+fi
 
-
+if [ $stage -eq 4 ]; then
 # Note: the --boost-silence option should probably be omitted by default
 # for normal setups.  It doesn't always help. [it's to discourage non-silence
 # models from modeling silence.]
@@ -116,7 +127,9 @@ steps/train_mono.sh --boost-silence 1.25 --nj 10 --cmd "$train_cmd" \
 
 steps/align_si.sh --boost-silence 1.25 --nj 10 --cmd "$train_cmd" \
    data/train_si84_half data/lang exp/mono0a exp/mono0a_ali || exit 1;
+fi
 
+if [ $stage -eq 5 ]; then
 steps/train_deltas.sh --boost-silence 1.25 --cmd "$train_cmd" \
     2000 10000 data/train_si84_half data/lang exp/mono0a_ali exp/tri1 || exit 1;
 
@@ -152,7 +165,9 @@ steps/word_align_lattices.sh --cmd "$train_cmd" --silence-label $sil_label \
 
 steps/align_si.sh --nj 10 --cmd "$train_cmd" \
   data/train_si84 data/lang exp/tri1 exp/tri1_ali_si84 || exit 1;
+fi
 
+if [ $stage -eq 6 ]; then
 # Train tri2a, which is deltas + delta-deltas, on si84 data.
 steps/train_deltas.sh --cmd "$train_cmd" \
   2500 15000 data/train_si84 data/lang exp/tri1_ali_si84 exp/tri2a || exit 1;
@@ -167,8 +182,9 @@ steps/decode.sh --nj 8 --cmd "$decode_cmd" \
 utils/mkgraph.sh data/lang_test_bg_5k exp/tri2a exp/tri2a/graph_bg5k
 steps/decode.sh --nj 8 --cmd "$decode_cmd" \
   exp/tri2a/graph_bg5k data/test_eval92 exp/tri2a/decode_eval92_bg5k || exit 1;
+fi
 
-
+if [ $stage -eq 7 ]; then
 steps/train_lda_mllt.sh --cmd "$train_cmd" \
    --splice-opts "--left-context=3 --right-context=3" \
    2500 15000 data/train_si84 data/lang exp/tri1_ali_si84 exp/tri2b || exit 1;
@@ -212,11 +228,13 @@ steps/decode_fromlats.sh --cmd "$decode_cmd" \
 # Align tri2b system with si84 data.
 steps/align_si.sh  --nj 10 --cmd "$train_cmd" \
   --use-graphs true data/train_si84 data/lang exp/tri2b exp/tri2b_ali_si84  || exit 1;
+fi
 
-
+if [ $stage -eq 8 ]; then
 local/run_mmi_tri2b.sh
+fi
 
-
+if [ $stage -eq 9 ]; then
 # From 2b system, train 3b which is LDA + MLLT + SAT.
 steps/train_sat.sh --cmd "$train_cmd" \
   2500 15000 data/train_si84 data/lang exp/tri2b_ali_si84 exp/tri3b || exit 1;
@@ -245,17 +263,23 @@ steps/decode_fmllr.sh --cmd "$decode_cmd" --nj 8 \
 steps/decode_fmllr.sh --cmd "$decode_cmd" --nj 10 \
   exp/tri3b/graph_bd_tgpr data/test_dev93 exp/tri3b/decode_bd_tgpr_dev93 || exit 1;
 
+# amit: the calls below to lmrescore_const_arpa.sh, lmrescore.sh didn't work.
+# lmrescore_const_arpa.sh doesn't work since it looks 
+# for a non-existent file data/lang_test_bd_fgconst/G.carpa. Don't know
+# how and where this is created. G.carpa must exist before you call lmrescore_const_arpa.sh.
+# lmrescore.sh didn't work since it looks for a non-existent file data/lang_test_bd_fg/G.fst.
+# Don't know how and where this is created.
 # Example of rescoring with ConstArpaLm.
-steps/lmrescore_const_arpa.sh \
-  --cmd "$decode_cmd" data/lang_test_bd_{tgpr,fgconst} \
-  data/test_eval92 exp/tri3b/decode_bd_tgpr_eval92{,_fgconst} || exit 1;
+# steps/lmrescore_const_arpa.sh \
+#  --cmd "$decode_cmd" data/lang_test_bd_{tgpr,fgconst} \
+#  data/test_eval92 exp/tri3b/decode_bd_tgpr_eval92{,_fgconst} || exit 1;
 
-steps/lmrescore.sh --cmd "$decode_cmd" data/lang_test_bd_tgpr data/lang_test_bd_fg \
-  data/test_eval92 exp/tri3b/decode_bd_tgpr_eval92 exp/tri3b/decode_bd_tgpr_eval92_fg \
-   || exit 1;
-steps/lmrescore.sh --cmd "$decode_cmd" data/lang_test_bd_tgpr data/lang_test_bd_tg \
-  data/test_eval92 exp/tri3b/decode_bd_tgpr_eval92 exp/tri3b/decode_bd_tgpr_eval92_tg \
-  || exit 1;
+#steps/lmrescore.sh --cmd "$decode_cmd" data/lang_test_bd_tgpr data/lang_test_bd_fg \
+#  data/test_eval92 exp/tri3b/decode_bd_tgpr_eval92 exp/tri3b/decode_bd_tgpr_eval92_fg \
+#  || exit 1;
+#steps/lmrescore.sh --cmd "$decode_cmd" data/lang_test_bd_tgpr data/lang_test_bd_tg \
+#  data/test_eval92 exp/tri3b/decode_bd_tgpr_eval92 exp/tri3b/decode_bd_tgpr_eval92_tg \
+#  || exit 1;
 
 # The command below is commented out as we commented out the steps above
 # that build the RNNLMs, so it would fail.
@@ -277,8 +301,9 @@ steps/lmrescore.sh --cmd "$decode_cmd" data/lang_test_bd_tgpr data/lang_test_bd_
 # From 3b system, align all si284 data.
 steps/align_fmllr.sh --nj 20 --cmd "$train_cmd" \
   data/train_si284 data/lang exp/tri3b exp/tri3b_ali_si284 || exit 1;
+fi
 
-
+if [ $stage -eq 10 ]; then
 # From 3b system, train another SAT system (tri4a) with all the si284 data.
 
 steps/train_sat.sh  --cmd "$train_cmd" \
@@ -290,14 +315,19 @@ steps/train_sat.sh  --cmd "$train_cmd" \
  steps/decode_fmllr.sh --nj 8 --cmd "$decode_cmd" \
    exp/tri4a/graph_tgpr data/test_eval92 exp/tri4a/decode_tgpr_eval92 || exit 1;
 ) & 
+fi
 
-
+if [ $stage -eq 11 ]; then
 # This step is just to demonstrate the train_quick.sh script, in which we
 # initialize the GMMs from the old system's GMMs.
 steps/train_quick.sh --cmd "$train_cmd" \
    4200 40000 data/train_si284 data/lang exp/tri3b_ali_si284 exp/tri4b || exit 1;
-
-(
+   
+# Amit: Run this in fg since we want exp/tri4b/{decode_bd_tgpr_dev93, decode_bd_tgpr_eval92}
+# to be ready before we run Karel's run_dnn.sh recipe. If we run this in bg, Karel's dnn
+# recipe might be executed before exp/tri4b/{decode_bd_tgpr_dev93, decode_bd_tgpr_eval92}
+# is ready resulting in aborting this script.
+#( 
  utils/mkgraph.sh data/lang_test_tgpr exp/tri4b exp/tri4b/graph_tgpr || exit 1;
  steps/decode_fmllr.sh --nj 10 --cmd "$decode_cmd" \
    exp/tri4b/graph_tgpr data/test_dev93 exp/tri4b/decode_tgpr_dev93 || exit 1;
@@ -309,66 +339,83 @@ steps/train_quick.sh --cmd "$train_cmd" \
    exp/tri4b/graph_bd_tgpr data/test_dev93 exp/tri4b/decode_bd_tgpr_dev93 || exit 1;
  steps/decode_fmllr.sh --nj 8 --cmd "$decode_cmd" \
   exp/tri4b/graph_bd_tgpr data/test_eval92 exp/tri4b/decode_bd_tgpr_eval92 || exit 1;
-) &
+#) &
 
+# Amit: commented this backgrd job since I don't need it
+#( # run decoding with larger dictionary and pron-probs.  Need to get dict with
+  ## pron-probs first.  [This seems to help by about 0.1% absolute in general.]
+  #cp -rT data/local/dict_larger data/local/dict_larger_pp
+  #rm -r data/local/dict_larger_pp/{b,f,*.gz,lexicon.txt}
+  #steps/get_lexicon_probs.sh data/train_si284 data/lang exp/tri4b data/local/dict_larger/lexicon.txt \
+    #exp/tri4b_lexprobs data/local/dict_larger_pp/lexiconp.txt || exit 1;
+  #utils/prepare_lang.sh --share-silence-phones true \
+    #data/local/dict_larger_pp "<SPOKEN_NOISE>" data/dict_larger/tmp data/lang_bd_pp
+  #cmp data/lang_bd/words.txt data/lang_bd_pp/words.txt || exit 1;
+  #for suffix in tg tgpr fg; do
+    #cp -rT data/lang_bd_pp data/lang_test_bd_pp_${suffix}
+    #cp data/lang_test_bd_${suffix}/G.fst data/lang_test_bd_pp_${suffix}/G.fst || exit 1;
+  #done
+  #utils/mkgraph.sh data/lang_test_bd_pp_tgpr exp/tri4b exp/tri4b/graph_bd_pp_tgpr || exit 1;
+  #steps/decode_fmllr.sh --nj $nj_decode --cmd "$decode_cmd" \
+    #exp/tri4b/graph_bd_pp_tgpr data/test_dev93 exp/tri4b/decode_bd_pp_tgpr_dev93 
+  #steps/decode_fmllr.sh --nj $nj_decode --cmd "$decode_cmd" \
+    #exp/tri4b/graph_bd_pp_tgpr data/test_eval92 exp/tri4b/decode_bd_pp_tgpr_eval92
+#)
+fi
 
-( # run decoding with larger dictionary and pron-probs.  Need to get dict with
-  # pron-probs first.  [This seems to help by about 0.1% absolute in general.]
-  cp -rT data/local/dict_larger data/local/dict_larger_pp
-  rm -r data/local/dict_larger_pp/{b,f,*.gz,lexicon.txt}
-  steps/get_lexicon_probs.sh data/train_si284 data/lang exp/tri4b data/local/dict_larger/lexicon.txt \
-    exp/tri4b_lexprobs data/local/dict_larger_pp/lexiconp.txt || exit 1;
-  utils/prepare_lang.sh --share-silence-phones true \
-    data/local/dict_larger_pp "<SPOKEN_NOISE>" data/dict_larger/tmp data/lang_bd_pp
-  cmp data/lang_bd/words.txt data/lang_bd_pp/words.txt || exit 1;
-  for suffix in tg tgpr fg; do
-    cp -rT data/lang_bd_pp data/lang_test_bd_pp_${suffix}
-    cp data/lang_test_bd_${suffix}/G.fst data/lang_test_bd_pp_${suffix}/G.fst || exit 1;
-  done
-  utils/mkgraph.sh data/lang_test_bd_pp_tgpr exp/tri4b exp/tri4b/graph_bd_pp_tgpr || exit 1;
-  steps/decode_fmllr.sh --nj 10 --cmd "$decode_cmd" \
-    exp/tri4b/graph_bd_pp_tgpr data/test_dev93 exp/tri4b/decode_bd_pp_tgpr_dev93 
-  steps/decode_fmllr.sh --nj 8 --cmd "$decode_cmd" \
-    exp/tri4b/graph_bd_pp_tgpr data/test_eval92 exp/tri4b/decode_bd_pp_tgpr_eval92
-)
-
-
+if [ $stage -eq 12 ]; then
 # Train and test MMI, and boosted MMI, on tri4b (LDA+MLLT+SAT on
 # all the data).  Use 30 jobs.
-steps/align_fmllr.sh --nj 30 --cmd "$train_cmd" \
+#steps/align_fmllr.sh --nj 30 --cmd "$train_cmd" \
+#  data/train_si284 data/lang exp/tri4b exp/tri4b_ali_si284 || exit 1;
+steps/align_fmllr.sh --nj 10 --cmd "$train_cmd" \
   data/train_si284 data/lang exp/tri4b exp/tri4b_ali_si284 || exit 1;
 
 # These demonstrate how to build a sytem usable for online-decoding with the nnet2 setup.
 # (see local/run_nnet2.sh for other, non-online nnet2 setups).
-local/online/run_nnet2.sh
-local/online/run_nnet2_baseline.sh
-local/online/run_nnet2_discriminative.sh
+# Amit: commented scripts below since I don't need em
+# local/online/run_nnet2.sh
+# local/online/run_nnet2_baseline.sh
+# local/online/run_nnet2_discriminative.sh
+# local/run_mmi_tri4b.sh
+fi
 
-local/run_mmi_tri4b.sh
+if [ $stage -eq 13 ]; then
+local/run_nnet2.sh
+fi
 
-#local/run_nnet2.sh
-
+if [ $stage -eq 14 ]; then
 ## Segregated some SGMM builds into a separate file.
 #local/run_sgmm.sh
 
 # You probably want to run the sgmm2 recipe as it's generally a bit better:
 local/run_sgmm2.sh
+fi
 
+if [ $stage -eq 15 ]; then
 # We demonstrate MAP adaptation of GMMs to gender-dependent systems here.  This also serves
 # as a generic way to demonstrate MAP adaptation to different domains.
-# local/run_gender_dep.sh
+local/run_gender_dep.sh
+fi
 
+if [ $stage -eq 16 ]; then
 # You probably want to run the hybrid recipe as it is complementary:
 local/run_dnn.sh
+fi
 
+if [ $stage -eq 17 ]; then
 # The next two commands show how to train a bottleneck network based on the nnet2 setup,
 # and build an SGMM system on top of it.
 #local/run_bnf.sh
 #local/run_bnf_sgmm.sh
+:
+fi
 
-
+if [ $stage -eq 18 ]; then
 # You probably want to try KL-HMM 
 #local/run_kl_hmm.sh
+:
+fi
 
 # Getting results [see RESULTS file]
 # for x in exp/*/decode*; do [ -d $x ] && grep WER $x/wer_* | utils/best_wer.sh; done
