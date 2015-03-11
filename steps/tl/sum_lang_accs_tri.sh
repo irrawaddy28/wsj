@@ -25,7 +25,7 @@ if [ $# != 6 ]; then
   exit 1;
 fi
 
-langwts_config=$1; # conf/langwts.list
+langwts_config=$1; # conf/l2.conf
 l1lang=$2  		   # data/lang dir of target language
 alidir=$3          # locn of the alignment directory of the target language (l1). Ali for source (l2) languages must be in $alidir/langali/
 x=$4 			   # iteration number of the force align-gmm restimation loop

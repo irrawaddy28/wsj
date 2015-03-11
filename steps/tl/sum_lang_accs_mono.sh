@@ -25,9 +25,9 @@ if [ $# != 6 ]; then
   exit 1;
 fi
 
-langwts_config=$1; # conf/langwts.list
+langwts_config=$1; # conf/l2.conf
 l1lang=$2  		   # data/lang dir of target language
-alitype=$3         # name (not the locn) of the alignment directory of the source (l2) language
+alitype=$3         # name (not the locn) of the monophone alignment directory of the source (l2) language
 x=$4 			   # iteration number of the force align-gmm restimation loop
 realign=$5         # realign flag - either true or false
 dir=$6			   # output directory
