@@ -161,7 +161,6 @@ echo -n "Getting feature dim : "
 feat_dim=$(feat-to-dim --print-args=false "$feats" -)
 echo $feat_dim
 
-
 # Now we will start building feature_transform which will 
 # be applied in CUDA to gain more speed.
 #
@@ -182,12 +181,11 @@ else
     echo "Using splice +/- $splice , step $splice_step"
     feature_transform=$dir/tr_splice$splice-$splice_step.nnet
     utils/nnet/gen_splice.py --fea-dim=$feat_dim --splice=$splice --splice-step=$splice_step > $feature_transform
-  fi
-
+  fi  
   # Renormalize the MLP input to zero mean and unit variance
   feature_transform_old=$feature_transform
   feature_transform=${feature_transform%.nnet}_cmvn-g.nnet
-  echo "Renormalizing MLP input features into $feature_transform"
+  echo "Renormalizing MLP input features into $feature_transform"  
   nnet-forward --use-gpu=$my_use_gpu \
     $feature_transform_old "$(echo $feats | sed 's|train.scp|train.scp.10k|')" \
     ark:- 2>$dir/log/cmvn_glob_fwd.log |\
@@ -202,9 +200,10 @@ fi
 
 
 ###### GET THE DIMENSIONS ######
-num_fea=$(feat-to-dim --print-args=false "$feats nnet-forward --use-gpu=no $feature_transform ark:- ark:- |" - 2>/dev/null)
+num_fea=$(feat-to-dim --print-args=false "$feats nnet-forward --use-gpu=$my_use_gpu $feature_transform ark:- ark:- |" - 2>/dev/null)
 num_hid=$hid_dim
-
+echo "$0: feats = $feats"
+echo "$0: feat dim = $num_fea, num hid layers = $num_hid"
 
 ###### PERFORM THE PRE-TRAINING ######
 for depth in $(seq 1 $nn_depth); do
