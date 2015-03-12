@@ -102,7 +102,7 @@ if [ $stage -le -2 ]; then
   fi
 
   gmm-mixup --mix-up=$numgauss $dir/1.mdl $dir/1.occs $dir/1.mdl 2>$dir/log/mixup.log || exit 1;
-  rm $dir/treeacc
+  #rm $dir/treeacc
 fi
 
 if [ $stage -le -1 ]; then
