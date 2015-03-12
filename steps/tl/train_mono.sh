@@ -103,7 +103,7 @@ if [ $stage -le -1 ]; then
     $dir/0.JOB.acc || exit 1;
     
   (( nlang > 0 )) && { 
-	steps/tl/sum_lang_accs_mono.sh --cmd "$cmd" --binary "false" $langwts_config $lang "mono_ali" 0 "true" $dir || exit 1; 
+	steps/tl/sum_lang_accs_mono.sh --cmd "$cmd" --binary "false" $langwts_config $lang "tri3_ali" 0 "true" $dir || exit 1; 
 	gmm-sum-accs --binary=false $dir/sum.0.acc $dir/langacc/lang.sum.0.acc $dir/0.*.acc || exit 1; 
 	} || { gmm-sum-accs --binary=false $dir/sum.0.acc $dir/0.*.acc || exit 1; }  
 fi
@@ -140,7 +140,7 @@ while [ $x -lt $num_iters ]; do
       $dir/$x.JOB.acc || exit 1;     
    
    (( nlang > 0 )) && { 
-		steps/tl/sum_lang_accs_mono.sh --cmd "$cmd" --binary "false" $langwts_config $lang "mono_ali" $x $is_realign $dir || exit 1; 
+		steps/tl/sum_lang_accs_mono.sh --cmd "$cmd" --binary "false" $langwts_config $lang "tri3_ali" $x $is_realign $dir || exit 1; 
 		gmm-sum-accs --binary=false $dir/sum.$x.acc $dir/langacc/lang.sum.$x.acc $dir/$x.*.acc || exit 1; 
 	} || { gmm-sum-accs --binary=false $dir/sum.$x.acc $dir/$x.*.acc || exit 1; }  
 
