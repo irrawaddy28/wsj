@@ -59,6 +59,7 @@ for (( i=0; i < $nlang; i++ ))
 do 	
 	alidir=${lang[$i]}/exp/$alitype;
 	data=${lang[$i]}/data/train;
+	# copy num_jobs, cmvn_opts but not splice_opts since l1 feats are not spliced
 	cp $alidir/num_jobs $dir/langali/num_jobs # carry over for use in subsequent stages
 	cp $alidir/cmvn_opts $dir/langali/cmvn_opts # carry over for use in subsequent stages
 	nj=`cat $dir/langali/num_jobs`;
