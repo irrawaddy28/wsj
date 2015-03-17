@@ -13,8 +13,8 @@ momentum=0
 l1_penalty=0
 l2_penalty=0
 # data processing
-minibatch_size=256
-randomizer_size=32768
+minibatch_size=256  #256
+randomizer_size=32768  #32768
 randomizer_seed=777
 feature_transform=
 # learn rate scheduling
@@ -44,6 +44,7 @@ if [ $# != 6 ]; then
    echo " e.g.: $0 0.nnet scp:train.scp scp:cv.scp ark:labels_tr.ark ark:labels_cv.ark exp/dnn1"
    echo "main options (for others, see top of script file)"
    echo "  --config <config-file>  # config containing options"
+   echo "  --max-iters <N>         # number of training iterations"  
    exit 1;
 fi
 
@@ -53,6 +54,14 @@ feats_cv=$3
 labels_tr=$4
 labels_cv=$5
 dir=$6
+
+echo -e "
+mlp_init=$1\n
+feats_tr=$2\n
+feats_cv=$3\n
+labels_tr=$4\n
+labels_cv=$5\n
+dir=$6\n"
 
 [ ! -d $dir ] && mkdir $dir
 [ ! -d $dir/log ] && mkdir $dir/log
@@ -70,6 +79,17 @@ mlp_base=${mlp_init##*/}; mlp_base=${mlp_base%.*}
 # optionally resume training from the best epoch
 [ -e $dir/.mlp_best ] && mlp_best=$(cat $dir/.mlp_best)
 [ -e $dir/.learn_rate ] && learn_rate=$(cat $dir/.learn_rate)
+
+echo -e "Training Parameters:\n 
+         mlp init = $mlp_best\n
+         learn rate = $learn_rate\n
+         max epochs = $max_iters\n
+         minibatch size = $minibatch_size\n
+         randomizer size = $randomizer_size\n
+         frame weights  = $frame_weights\n
+         momentum = $momentum\n
+         l1-penalty = $l1_penalty\n
+         l2-penalty = $l2_penalty\n"
 
 # cross-validation on original network
 log=$dir/log/iter00.initial.log; hostname>$log
@@ -179,7 +199,3 @@ else
   "Error training neural network..."
   exit 1
 fi
-
-
-
-

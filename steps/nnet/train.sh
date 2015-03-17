@@ -20,6 +20,7 @@ bn_dim=            # set a value to get a bottleneck network
 dbn=               # select DBN to prepend to the MLP initialization
 #
 init_opts=         # options, passed to the initialization script
+nnet_binary=true
 
 # FEATURE PROCESSING
 copy_feats=true # resave the train/cv features into /tmp (disabled by default)
@@ -41,7 +42,8 @@ splice_after_transf=5
 lda_dim=300        # LDA dimension (applies to `lda` feat_type)
 
 # LABELS
-labels=            # use these labels to train (override deafault pdf alignments, has to be in 'Posterior' format, see ali-to-post) 
+labels_trainf=      # use these labels to train (override deafault pdf alignments, has to be in 'Posterior' format, see ali-to-post) 
+labels_crossvf=
 num_tgt=           # force to use number of outputs in the MLP (default is autodetect)
 
 # TRAINING SCHEDULER
@@ -49,6 +51,7 @@ learn_rate=0.008   # initial learning rate
 train_opts=        # options, passed to the training script
 train_tool=        # optionally change the training tool
 frame_weights=     # per-frame weights for gradient weighting
+train_iters=20
 
 # OTHER
 seed=777    # seed value used for training data shuffling and initialization
@@ -77,16 +80,24 @@ if [ $# != 6 ]; then
    echo "  --apply-cmvn <bool>      # apply CMN"
    echo "  --norm-vars <bool>       # add CVN if CMN already active"
    echo "  --splice <N>             # concatenate input features"
+   echo "  --splice-step <N>        # stepsize of the splicing"
    echo "  --feat-type <type>       # select type of input features"
    echo ""
    echo "  --mlp-proto <file>       # use this NN prototype"
+   echo "  --mlp-init  <file>       # use this to initialize NN" 
+   echo "  --nnet-binary <bool>     # write nnet model in bin or txt "
    echo "  --feature-transform <file> # re-use this input feature transform"
    echo "  --hid-layers <N>         # number of hidden layers"
    echo "  --hid-dim <N>            # width of hidden layers"
    echo "  --bn-dim <N>             # make bottle-neck network with bn-with N"
    echo ""
+   echo "  --labels-trainf  <file>	# targets for training"
+   echo "  --labels-crossvf <file>  # targets for cross-validation"  
+   echo ""
    echo "  --learn-rate <float>     # initial leaning-rate"
+   echo "  --train-iters <N>        # number of nnet training iterations"
    echo "  --copy-feats <bool>      # copy input features to /tmp (it's faster)"
+   echo "  --frame-weights <ark file>  # per-frame weights for gradient weighting"
    echo ""
    exit 1;
 fi
@@ -99,9 +110,9 @@ alidir_cv=$5
 dir=$6
 
 # Using alidir for supervision (default)
-if [ -z "$labels" ]; then 
+if [ -z "$labels_trainf" ]; then 
   silphonelist=`cat $lang/phones/silence.csl` || exit 1;
-  for f in $alidir/final.mdl $alidir/ali.1.gz $alidir_cv/ali.1.gz; do
+  for f in $alidir/final.mdl $alidir/ali*.1.gz $alidir_cv/ali*.1.gz; do
     [ ! -f $f ] && echo "$0: no such file $f" && exit 1;
   done
 fi
@@ -130,16 +141,25 @@ fi
 ###### PREPARE ALIGNMENTS ######
 echo
 echo "# PREPARING ALIGNMENTS"
-if [ ! -z "$labels" ]; then
-  echo "Using targets '$labels' (by force)"
-  labels_tr="$labels"
-  labels_cv="$labels"
+if [[ ! -z "$labels_trainf" ]]; then
+	labels_tr=$(cat $labels_trainf 2>/dev/null| sed 's|#|"|g')
+
+	if [[ ! -z "$labels_crossvf" ]]; then
+	  labels_cv=$(cat $labels_crossvf 2>/dev/null| sed 's|#|"|g')	  
+	else
+	  labels_cv=$labels_tr
+	fi  
+	
+	echo -e "Using targets by force (train): $labels_tr \n"
+    echo -e "Using targets by force (cross val): $labels_cv"  
+  # This makes alidir_cv=$5 useless
 else
   echo "Using PDF targets from dirs '$alidir' '$alidir_cv'"
   # define pdf-alignment rspecifiers
   labels_tr="ark:ali-to-pdf $alidir/final.mdl \"ark:gunzip -c $alidir/ali.*.gz |\" ark:- | ali-to-post ark:- ark:- |"
   labels_cv="ark:ali-to-pdf $alidir/final.mdl \"ark:gunzip -c $alidir_cv/ali.*.gz |\" ark:- | ali-to-post ark:- ark:- |"
-  # 
+fi
+   
   labels_tr_pdf="ark:ali-to-pdf $alidir/final.mdl \"ark:gunzip -c $alidir/ali.*.gz |\" ark:- |" # for analyze-counts.
   labels_tr_phn="ark:ali-to-phones --per-frame=true $alidir/final.mdl \"ark:gunzip -c $alidir/ali.*.gz |\" ark:- |"
 
@@ -152,8 +172,8 @@ else
 
   # make phone counts for analysis
   analyze-counts --verbose=1 --symbol-table=$lang/phones.txt "$labels_tr_phn" /dev/null 2>$dir/log/analyze_counts_phones.log || exit 1
-fi
 
+  
 ###### PREPARE FEATURES ######
 echo
 echo "# PREPARING FEATURES"
@@ -207,7 +227,7 @@ else
 fi
 
 # optionally add deltas
-delta_order_file=$(dirname $feature_transform)/delta_order
+[[ ! -z $feature_transform ]] && delta_order_file=$(dirname $feature_transform)/delta_order
 [ -e $delta_order_file ] && delta_order=$(cat $delta_order_file)
 if [ "$delta_order" != "" ]; then
   feats_tr="$feats_tr add-deltas --delta-order=$delta_order ark:- ark:- |"
@@ -217,6 +237,7 @@ if [ "$delta_order" != "" ]; then
 fi
 
 # get feature dim
+echo "feats_tr: $feats_tr"
 echo "Getting feature dim : "
 feat_dim=$(feat-to-dim --print-args=false "$feats_tr" -)
 echo "Feature dim is : $feat_dim"
@@ -303,7 +324,7 @@ else
   feature_transform_old=$feature_transform
   feature_transform=${feature_transform%.nnet}_cmvn-g.nnet
   echo "Renormalizing MLP input features into $feature_transform"
-  nnet-forward --use-gpu=$my_use_gpu \
+  nnet-forward --use-gpu="no" \
     $feature_transform_old "$(echo $feats_tr | sed 's|train.scp|train.scp.10k|')" \
     ark:- 2>$dir/log/nnet-forward-cmvn.log |\
   compute-cmvn-stats ark:- - | cmvn-to-nnet - - |\
@@ -323,13 +344,15 @@ echo "# NN-INITIALIZATION"
 if [ ! -z "$mlp_proto" ]; then 
   echo "Initializing using network prototype '$mlp_proto'";
   mlp_init=$dir/nnet.init; log=$dir/log/nnet_initialize.log
-  nnet-initialize $mlp_proto $mlp_init 2>$log || { cat $log; exit 1; } 
+  nnet-initialize --binary=${nnet_binary} $mlp_proto $mlp_init 2>$log || { cat $log; exit 1; } 
 fi
 if [[ -z "$mlp_init" && -z "$mlp_proto" ]]; then
+  echo "Generate both network prototype and initial network";
   echo "Getting input/output dims :"
   #initializing the MLP, get the i/o dims...
   #input-dim
   num_fea=$(feat-to-dim "$feats_tr nnet-forward $feature_transform ark:- ark:- |" - )
+  echo "feat dim (after applying feat transform) = $num_fea"
   { #optioanlly take output dim of DBN
     [ ! -z $dbn ] && num_fea=$(nnet-forward "nnet-concat $feature_transform $dbn -|" "$feats_tr" ark:- | feat-to-dim ark:- -)
     [ -z "$num_fea" ] && echo "Getting nnet input dimension failed!!" && exit 1
@@ -337,7 +360,8 @@ if [[ -z "$mlp_init" && -z "$mlp_proto" ]]; then
 
   #output-dim
   [ -z $num_tgt ] && num_tgt=$(hmm-info --print-args=false $alidir/final.mdl | grep pdfs | awk '{ print $NF }')
-
+  echo "num tgt = $num_tgt, hid layers = $hid_layers, hid dim = $hid_dim, prepend_cnn_type = $prepend_cnn_type"
+  
   # make network prototype
   mlp_proto=$dir/nnet.proto
   echo "Genrating network prototype $mlp_proto"
@@ -366,12 +390,12 @@ if [[ -z "$mlp_init" && -z "$mlp_proto" ]]; then
   # initialize
   mlp_init=$dir/nnet.init; log=$dir/log/nnet_initialize.log
   echo "Initializing $mlp_proto -> $mlp_init"
-  nnet-initialize $mlp_proto $mlp_init 2>$log || { cat $log; exit 1; }
+  nnet-initialize --binary=${nnet_binary} $mlp_proto $mlp_init 2>$log || { cat $log; exit 1; }
 
   #optionally prepend dbn to the initialization
   if [ ! -z $dbn ]; then
     mlp_init_old=$mlp_init; mlp_init=$dir/nnet_$(basename $dbn)_dnn.init
-    nnet-concat $dbn $mlp_init_old $mlp_init || exit 1 
+    nnet-concat --binary=${nnet_binary} $dbn $mlp_init_old $mlp_init || exit 1 
   fi
 fi
 
@@ -383,6 +407,7 @@ steps/nnet/train_scheduler.sh \
   --feature-transform $feature_transform \
   --learn-rate $learn_rate \
   --randomizer-seed $seed \
+  --max-iters $train_iters \
   ${train_opts} \
   ${train_tool:+ --train-tool "$train_tool"} \
   ${frame_weights:+ --frame-weights "$frame_weights"} \

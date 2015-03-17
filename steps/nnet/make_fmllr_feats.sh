@@ -12,6 +12,7 @@ nj=4
 cmd=run.pl
 transform_dir=
 raw_transform_dir=
+use_delta=false
 # End configuration section.
 
 echo "$0 $@"  # Print the command line for logging
@@ -32,6 +33,7 @@ if [ $# != 5 ]; then
    echo "  --nj <nj>                                        # number of parallel jobs"
    echo "  --cmd (utils/run.pl|utils/queue.pl <queue opts>) # how to run jobs."
    echo "  --transform-dir <transform-dir>                  # where to find fMLLR transforms."
+   echo "  --use-delta     <bool> 							# if set to true, will use mfcc + delta feats only, forcibly ignore fMLLR and LDA"
    exit 1;
 fi
 
@@ -67,6 +69,7 @@ feat_type=delta # Default
 [ -f $gmmdir/final.mat -a ! -z "$transform_dir" ] && feat_type=lda_fmllr
 [ ! -z "$raw_transform_dir" ] && feat_type=raw_fmllr
 [ ! -z "$raw_transform_dir" -a -f $gmmdir/final.mat -a ! -z "$transform_dir" ] && feat_type=raw_fmllr_lda_fmllr
+$use_delta && feat_type=delta
 echo "$0: feature type is $feat_type";
 
 # Hand-code the feature pipeline,
