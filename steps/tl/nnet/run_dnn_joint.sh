@@ -32,6 +32,7 @@ post_fix=""
 train_iters=20
 use_delta=false
 xent_wt=0.01
+minibatch_size=256
 # End of config.
 [ -f ./path.sh ] && . ./path.sh; # source the path.
 . utils/parse_options.sh || exit 1;
@@ -49,6 +50,7 @@ if [ $# != 2 ]; then
    echo "  --train-iters <N>                                # number of nnet training iterations"
    echo "  --use-delta     <bool> 							# if set to true, will use mfcc + delta feats only, forcibly ignore transforms"
    echo "  --xent-wt <float>                                # cross-entropy regularization weight"
+   echo "  --minibatch-size <N>                             # num of frames reqd. to perform parameter update in minibatch SGD"
    exit 1;
 fi
 
@@ -137,7 +139,7 @@ if [ $stage -le 2 ]; then
   
   (tail --pid=$$ -F $dir/log/train_nnet.log 2>/dev/null)& # forward log  
   $cuda_cmd $dir/log/train_nnet.log \
-    steps/nnet/train.sh --splice 5 --splice-step 1  $feature_transform_opt --feat-type "plain" \
+    steps/nnet/train.sh --splice 5 --splice-step 1  $feature_transform_opt --feat-type "plain" --minibatch-size ${minibatch_size}\
 	--nnet-binary "false" --train-iters ${train_iters} --labels-trainf $dir/labels_tr  --labels-crossvf $dir/labels_cv \
     --frame-weights "ark,t:$dir/l12.frwts" --dbn $dbn --hid-layers 0 --hid-dim 1024 --learn-rate 0.008 \
     $data_fmllr/train_tr90 $data_fmllr/train_cv10 data/lang $ali $ali $dir || exit 1;  

@@ -52,6 +52,7 @@ train_opts=        # options, passed to the training script
 train_tool=        # optionally change the training tool
 frame_weights=     # per-frame weights for gradient weighting
 train_iters=20
+minibatch_size=256
 
 # OTHER
 seed=777    # seed value used for training data shuffling and initialization
@@ -98,6 +99,7 @@ if [ $# != 6 ]; then
    echo "  --train-iters <N>        # number of nnet training iterations"
    echo "  --copy-feats <bool>      # copy input features to /tmp (it's faster)"
    echo "  --frame-weights <ark file>  # per-frame weights for gradient weighting"
+   echo "  --minibatch-size <N>     # num of frames reqd. to perform parameter update in minibatch SGD"
    echo ""
    exit 1;
 fi
@@ -408,6 +410,7 @@ steps/nnet/train_scheduler.sh \
   --learn-rate $learn_rate \
   --randomizer-seed $seed \
   --max-iters $train_iters \
+  --minibatch-size ${minibatch_size} \
   ${train_opts} \
   ${train_tool:+ --train-tool "$train_tool"} \
   ${frame_weights:+ --frame-weights "$frame_weights"} \
