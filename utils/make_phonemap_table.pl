@@ -1,13 +1,11 @@
 #! /usr/bin/perl
 #
-# Convert the mapped phones from symbols to int
-# "Mapped phones" means phones in one language are mapped to another language 
-# perl utils/l1tol2phonemap_to_int.pl [-col n] <l2 to l1 phone map file> <l2 phones.txt> <l1 phones.txt>
-# 
+# Prints a table of mappings of L1 phones to L2 phones
+#  
 # ============================================================================
 # Revision History
 # Date 				Author 					Description of Change
-# 11/27/14			AD 						Created 
+# 03/25/15			AD 						Created 
 #
 # ============================================================================
 
