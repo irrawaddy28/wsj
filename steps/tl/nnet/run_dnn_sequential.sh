@@ -32,6 +32,7 @@ post_fix=""
 train_iters=20
 l2_iters=2
 use_delta=false
+minibatch_size=256
 # End of config.
 [ -f ./path.sh ] && . ./path.sh; # source the path.
 . utils/parse_options.sh || exit 1;
@@ -48,7 +49,8 @@ if [ $# != 2 ]; then
    echo "  --precomp-dbn <pre-computed dbn dir>             # pre-computed dbn dir that can be used for DNN training"
    echo "  --train-iters <N>                                # number of nnet training iterations for l1"
    echo "  --l2-iters <N>                                    # number of nnet training iterations for l2"
-   echo "  --use-delta     <bool> 							# if set to true, will use mfcc + delta feats only, forcibly ignore transforms"   
+   echo "  --use-delta     <bool> 							# if set to true, will use mfcc + delta feats only, forcibly ignore transforms"
+   echo "  --minibatch-size <N>                             # num of frames reqd. to perform parameter update in minibatch SGD"   
    exit 1;
 fi
 
@@ -56,6 +58,9 @@ fi
 langwts_config=$1
 gmmdir=$2  #exp/tri3
 data_fmllr=data-fmllr-$(basename $gmmdir)   #data-fmllr-tri3
+
+[[ ! -z $post_fix ]] && post_fix="_$post_fix"
+post_fix=$(basename $gmmdir)$post_fix
 echo "user i/p fMMLR transform dir = $transform_dir";
 
 if [ $stage -le 0 ]; then
@@ -119,7 +124,7 @@ if [ $stage -le 2 ]; then
   (tail --pid=$$ -F $dir/log/train_nnet.log 2>/dev/null)& # forward log
   # Step 1: Train NN using L2 data for few iterations
   $cuda_cmd $dir/log/train_nnet.log \
-    steps/nnet/train.sh --splice 5 --splice-step 1  $feature_transform_opt --feat-type "plain" \
+    steps/nnet/train.sh --splice 5 --splice-step 1  $feature_transform_opt --feat-type "plain" --minibatch-size ${minibatch_size} \
 	--nnet-binary "false" --train-iters ${l2_iters} \
     --dbn $dbn --hid-layers 0 --hid-dim 1024 --learn-rate 0.008 \
     ${data_fmllr_lang}/train_tr90 ${data_fmllr_lang}/train_cv10 data/lang $langali $langali $dir || exit 1;    
@@ -131,18 +136,18 @@ if [ $stage -le 2 ]; then
   ali=${gmmdir}_ali
   (tail --pid=$$ -F $dir/log/train_nnet.log 2>/dev/null)& # forward log  
   $cuda_cmd $dir/log/train_nnet.log \
-    steps/nnet/train.sh --mlp-init $mlp_init --splice 5 --splice-step 1  $feature_transform_opt --feat-type "plain" \
+    steps/nnet/train.sh --mlp-init $mlp_init --splice 5 --splice-step 1  $feature_transform_opt --feat-type "plain" --minibatch-size ${minibatch_size} \
 	--nnet-binary "false" --train-iters ${train_iters} \
     --dbn $dbn --hid-layers 0 --hid-dim 1024 --learn-rate 0.008 \
     $data_fmllr/train_tr90 $data_fmllr/train_cv10 data/lang $ali $ali $dir || exit 1;
 
   # Decode (reuse HCLG graph)
   nj_decode=$(cat conf/dev_spk.list |wc -l); [[ $nj_decode -gt  $max_nj_decode ]] && nj_decode=$max_nj_decode;  
-  steps/nnet/decode.sh --nj $nj_decode --cmd "$decode_cmd" --use-gpu $my_use_gpu --acwt 0.2 \
+  steps/nnet/decode.sh --nj $nj_decode --cmd "$decode_cmd" --use-gpu no --acwt 0.2 \
     $gmmdir/graph $data_fmllr/dev $dir/decode_dev || exit 1;
   
   nj_decode=$(cat conf/test_spk.list |wc -l); [[ $nj_decode -gt  $max_nj_decode ]] && nj_decode=$max_nj_decode; 
-  steps/nnet/decode.sh --nj $nj_decode --cmd "$decode_cmd" --use-gpu $my_use_gpu --acwt 0.2 \
+  steps/nnet/decode.sh --nj $nj_decode --cmd "$decode_cmd" --use-gpu no --acwt 0.2 \
     $gmmdir/graph $data_fmllr/test $dir/decode_test || exit 1;  
 fi
 
