@@ -9,7 +9,7 @@
 #
 # ============================================================================
 
-my $usage = "\nUsage:\nperl $0 [-col-l1ph-l1f n] [-col-l1ph-mapf m1] [-col_l2ph_mapf m2] <l1 phone file> <l2 to l1 phone map file>
+my $usage = "\nUsage:\nperl $0 [-col-l1ph-l1f n] [-col-l1ph-mapf m1] [-col-l2ph-mapf m2] <l1 phone file> <l2 to l1 phone map file>
 Prints a table of mappings of L1 phones to L2 phones.
 
 Example:
@@ -21,7 +21,7 @@ die "$usage" unless(@ARGV >= 2);
 my $col_l1ph_l1f = 2; # column index of L1 phones in L1 phone file
 my $col_l1ph_mapf = 2; # column index of L1 phones in map file
 my $col_l2ph_mapf = 1; # column index of L2 phones in map file
-GetOptions ("col-l1ph-l1f=i" => \$col_l1ph_l1f, "col-l1ph-mapf=i" => \$col_l1ph_mapf, "col_l2ph_mapf=i" => \$col_l2ph_mapf);
+GetOptions ("col-l1ph-l1f=i" => \$col_l1ph_l1f, "col-l1ph-mapf=i" => \$col_l1ph_mapf, "col-l2ph-mapf=i" => \$col_l2ph_mapf);
 	    
 # Transform transcripts in METU to WORLDBET 
 my ($l1phonef, $l2l1mapf) = @ARGV;
