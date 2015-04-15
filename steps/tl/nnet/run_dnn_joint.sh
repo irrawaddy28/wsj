@@ -26,6 +26,7 @@ stage=0 # resume training with --stage=N
 max_nj_decode=10 
 transform_dir=
 num_trn_utt=
+num_trn_utt_l2= 
 #precomp_feat_transform=
 precomp_dbn=
 post_fix=""
@@ -44,7 +45,8 @@ if [ $# != 2 ]; then
    echo "  --nj <nj>                                        # number of parallel jobs"
    echo "  --cmd (utils/run.pl|utils/queue.pl <queue opts>) # how to run jobs."
    echo "  --transform-dir <transform-dir>                  # where to find fMLLR transforms."
-   echo "  --num-trn-utt <n>                                # number of utts in train set."
+   echo "  --num-trn-utt <n>                                # number of utts in L1 train set."
+   echo "  --num-trn-utt-l2 <n>                             # number of utts in L2 train set."
    echo "  --post-fix   <string>                            # add a post-fix string to exp/dnn dir" 
    echo "  --precomp-dbn <pre-computed dbn dir>             # pre-computed dbn dir that can be used for DNN training"
    echo "  --train-iters <N>                                # number of nnet training iterations"
@@ -91,8 +93,14 @@ if [ $stage -le 0 ]; then
   dir=${data_fmllr_lang}/train  
   steps/tl/nnet/make_fmllr_feats_lang.sh --nj 10 --cmd "$train_cmd" --use-delta $use_delta \
     $dir $langwts_config "tri3" || exit 1 
-
-  utils/combine_data.sh ${data_fmllr}/train_tr90 ${data_fmllr}/train_l1_tr90 ${data_fmllr_lang}/train || exit 1      
+  
+  if [[ -z $num_trn_utt_l2 ]]; then
+	utils/combine_data.sh ${data_fmllr}/train_tr90 ${data_fmllr}/train_l1_tr90 ${data_fmllr_lang}/train || exit 1
+  else  	
+	utils/subset_data_dir.sh $dir ${num_trn_utt_l2} ${data_fmllr_lang}/train_subset
+	utils/combine_data.sh ${data_fmllr}/train_tr90 ${data_fmllr}/train_l1_tr90 ${data_fmllr_lang}/train_subset || exit 1      
+  fi
+  
 fi
 
 if [ $stage -le 1 ]; then
