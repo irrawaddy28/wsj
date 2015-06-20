@@ -10,6 +10,7 @@
 
 # Begin configuration..
 cmd=run.pl
+nj=
 scale_opts="--transition-scale=1.0 --acoustic-scale=0.1 --self-loop-scale=0.1"
 realign_iters="10 15"; # Only realign twice.
 num_iters=20    # Number of iterations of training
@@ -33,6 +34,7 @@ if [ $# != 6 ]; then
   echo "  --cmd (utils/run.pl|utils/queue.pl <queue opts>) # how to run jobs."
   echo "  --config <config-file>                           # config containing options"
   echo "  --stage <stage>                                  # stage to do partial re-run from."
+  echo "  --nj <n>										   # num jobs. "
   exit 1;
 fi
 
@@ -55,7 +57,8 @@ numgauss=$[totgauss/2] # Start with half the total number of Gaussians.  We won'
   # to mix up much probably, as we're initializing with the old (already mixed-up) pdf's.  
 [ $numgauss -lt $numleaves ] && numgauss=$numleaves
 incgauss=$[($totgauss-$numgauss)/$maxiterinc] # per-iter increment for #Gauss
-nj=`cat $alidir/num_jobs` || exit 1;
+[[ -z $nj ]] && { nj=`cat $alidir/num_jobs` || exit 1; }
+echo "Using num jobs = $nj"
 sdata=$data/split$nj
 splice_opts=`cat $alidir/splice_opts 2>/dev/null` # frame-splicing options.
 cmvn_opts=`cat $alidir/cmvn_opts 2>/dev/null`
