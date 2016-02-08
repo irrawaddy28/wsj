@@ -2,6 +2,7 @@
 
 . ./cmd.sh ## You'll want to change cmd.sh to something that will work on your system.
            ## This relates to the queue.
+. ./path.sh           
 set -e # exit on error
 # This is a shell script, but it's recommended that you run the commands one by
 # one by copying and pasting into the shell.
